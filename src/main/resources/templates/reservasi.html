@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reservasi Buku | Perpustakaan</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<header class="site-header">
+    <div class="nav-inner">
+        <a class="brand" th:href="@{/pinjam}">
+            <span class="brand-mark">B</span>
+            <span class="brand-copy"><strong>BookSpace</strong><span>Library Management</span></span>
+        </a>
+        <nav class="nav-links" aria-label="Navigasi utama">
+            <a class="nav-link" th:href="@{/pinjam}">Pinjam Buku</a>
+            <a class="nav-link active" th:href="@{/reservasi}">Reservasi</a>
+            <a class="nav-link" th:href="@{/stok}">Kelola Stok</a>
+        </nav>
+    </div>
+</header>
+
+<main class="page-shell">
+    <section class="hero">
+        <div class="hero-content">
+            <span class="eyebrow">Layanan Reservasi</span>
+            <h1>Antre buku yang sedang dipinjam.</h1>
+            <p>Reservasi dapat diajukan ketika stok buku bernilai nol. Pengajuan akan tercatat dengan status menunggu.</p>
+            <span class="hero-tag"><span class="hero-tag-dot"></span> Anggota: <b th:text="${idAnggota}">A001</b></span>
+        </div>
+    </section>
+
+    <div th:if="${pesanError}" class="notice notice-error">
+        <span class="notice-icon">!</span><div><strong>Reservasi belum berhasil</strong><span th:text="${pesanError}">Pesan kesalahan</span></div>
+    </div>
+
+    <section class="section form-grid">
+        <div class="form-card reservation-panel" th:if="${bukuTerpilih != null}">
+            <span class="eyebrow">Konfirmasi Pengajuan</span>
+            <h3>Reservasi buku pilihan</h3>
+            <p>Pastikan buku yang dipilih sudah sesuai sebelum mengirim pengajuan.</p>
+            <div class="reservation-details">
+                <dl>
+                    <dt>ID Buku</dt><dd th:text="${bukuTerpilih.idBuku}">B002</dd>
+                    <dt>Judul Buku</dt><dd th:text="${bukuTerpilih.judul}">Rekayasa Perangkat Lunak</dd>
+                    <dt>Ketersediaan</dt><dd><span th:if="${bukuTerpilih.stok == 0}" class="stock-pill stock-empty">Stok habis · 0</span><span th:if="${bukuTerpilih.stok > 0}" class="stock-pill stock-good" th:text="|Tersedia · ${bukuTerpilih.stok} buku|">Tersedia</span></dd>
+                    <dt>Anggota</dt><dd th:text="${idAnggota}">A001</dd>
+                </dl>
+            </div>
+            <form th:if="${bukuTerpilih.stok == 0}" th:action="@{/reservasi}" method="post">
+                <input type="hidden" name="idBuku" th:value="${bukuTerpilih.idBuku}">
+                <div class="form-actions">
+                    <button class="btn btn-orange" type="submit">Konfirmasi Reservasi</button>
+                    <a class="btn btn-outline" th:href="@{/pinjam}">Batal</a>
+                </div>
+            </form>
+            <div th:if="${bukuTerpilih.stok > 0}" class="notice notice-info" style="margin-bottom:0;">
+                <span class="notice-icon">i</span>
+                <div><strong>Buku masih tersedia</strong>Silakan lakukan peminjaman langsung melalui halaman Pinjam Buku.</div>
+            </div>
+        </div>
+
+        <div class="form-card" th:if="${bukuTerpilih == null}">
+            <span class="eyebrow">Pengajuan Baru</span>
+            <h3>Ajukan reservasi</h3>
+            <p>Masukkan ID buku yang stoknya habis untuk melihat detail dan mengonfirmasi reservasi.</p>
+            <form th:action="@{/reservasi}" method="get">
+                <div class="field">
+                    <label for="idBuku">ID Buku</label>
+                    <input id="idBuku" type="text" name="idBuku" placeholder="Contoh: B002" required>
+                    <span class="field-help">Periksa ID buku pada katalog peminjaman.</span>
+                </div>
+                <button class="btn btn-primary" type="submit">Periksa Buku</button>
+            </form>
+        </div>
+
+        <div class="form-card">
+            <span class="eyebrow">Ketentuan</span>
+            <h3>Syarat reservasi</h3>
+            <p>Pengajuan reservasi mengikuti pemeriksaan otomatis dari sistem.</p>
+            <div class="notice notice-info" style="margin:0;">
+                <span class="notice-icon">i</span>
+                <div><strong>Stok harus habis</strong>Reservasi hanya dapat dilakukan untuk buku dengan stok 0. Satu anggota tidak dapat memiliki reservasi aktif ganda untuk buku yang sama.</div>
+            </div>
+            <div style="margin-top:15px;">
+                <a class="btn btn-soft" th:href="@{/pinjam}">Kembali ke Katalog Buku</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-heading">
+            <div><h2>Riwayat Reservasi</h2><p>Daftar seluruh reservasi yang telah tercatat pada sistem.</p></div>
+        </div>
+        <div class="table-card">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>No. Reservasi</th><th>Anggota</th><th>Buku</th><th>Tanggal</th><th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(daftarReservasi)}">
+                        <td colspan="5" class="empty-state">Belum ada data reservasi. Pengajuan yang berhasil akan muncul di bagian ini.</td>
+                    </tr>
+                    <tr th:each="r : ${daftarReservasi}">
+                        <td><span class="id-code" th:text="${r.idReservasi}">R0001</span></td>
+                        <td><span class="book-title" th:text="${r.anggota.nama}">Budi Santoso</span><span class="book-subtitle" th:text="${r.anggota.idAnggota}">A001</span></td>
+                        <td><span class="book-title" th:text="${r.buku.judul}">Rekayasa Perangkat Lunak</span><span class="book-subtitle" th:text="${r.buku.idBuku}">B002</span></td>
+                        <td th:text="${r.tanggalReservasi}">2026-11-01</td>
+                        <td><span class="status-pill status-waiting" th:text="${r.status}">MENUNGGU</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    <p class="footer-note">BookSpace · Sistem Informasi Perpustakaan</p>
+</main>
+</body>
+</html>

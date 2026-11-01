@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pinjam Buku | Perpustakaan</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<header class="site-header">
+    <div class="nav-inner">
+        <a class="brand" th:href="@{/pinjam}">
+            <span class="brand-mark">B</span>
+            <span class="brand-copy"><strong>BookSpace</strong><span>Library Management</span></span>
+        </a>
+        <nav class="nav-links" aria-label="Navigasi utama">
+            <a class="nav-link active" th:href="@{/pinjam}">Pinjam Buku</a>
+            <a class="nav-link" th:href="@{/reservasi}">Reservasi</a>
+            <a class="nav-link" th:href="@{/stok}">Kelola Stok</a>
+        </nav>
+    </div>
+</header>
+
+<main class="page-shell">
+    <section class="hero">
+        <div class="hero-content">
+            <span class="eyebrow">Layanan Anggota</span>
+            <h1>Temukan buku, mulai pengetahuan baru.</h1>
+            <p>Pilih buku yang tersedia untuk dipinjam. Sistem akan memeriksa kuota anggota dan ketersediaan stok sebelum mencatat transaksi.</p>
+            <span class="hero-tag"><span class="hero-tag-dot"></span> Sistem Peminjaman Perpustakaan</span>
+        </div>
+    </section>
+
+    <section class="section member-panel">
+        <div class="member-info">
+            <div class="member-icon">A</div>
+            <div>
+                <strong th:text="${anggotaAktif.nama}">Budi Santoso</strong>
+                <span th:text="|Anggota aktif · ${idAnggota}|">Anggota aktif · A001</span>
+            </div>
+        </div>
+        <form class="member-switch" th:action="@{/pinjam}" method="get">
+            <div>
+                <label for="anggota">Pilih akun anggota simulasi</label>
+                <select id="anggota" name="anggota">
+                    <option th:each="a : ${daftarAnggota}"
+                            th:value="${a.idAnggota}"
+                            th:selected="${a.idAnggota == idAnggota}"
+                            th:text="|${a.nama} (${a.idAnggota})|">Budi Santoso (A001)</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" type="submit">Ganti Anggota</button>
+        </form>
+        <div class="quota">
+            <strong th:text="|${jumlahPinjamanAktif}/${batasPinjam}|">0/2</strong>
+            <span>Peminjaman aktif<br>Kuota anggota</span>
+        </div>
+    </section>
+
+    <div class="notice notice-info" style="margin-top:16px;">
+        <span class="notice-icon">ⓘ</span>
+        <div><strong>Mode simulasi</strong>Gunakan pemilih anggota untuk mencoba transaksi dengan akun berbeda. Batas peminjaman tetap mengikuti data masing-masing anggota.</div>
+    </div>
+
+    <div th:if="${pesan}" class="notice notice-error">
+        <span class="notice-icon">!</span>
+        <div>
+            <strong th:text="${pesan}">Peminjaman tidak berhasil</strong>
+            <span th:if="${bisaReservasi}">Stok buku sedang habis. Kamu dapat mengajukan reservasi untuk buku tersebut.</span>
+            <span th:if="${pesan == 'Melewati batas pinjam'}">Kuota anggota sudah terpakai seluruhnya. Ganti akun simulasi atau mulai ulang aplikasi untuk mengembalikan data awal.</span>
+            <div th:if="${bisaReservasi}" style="margin-top:10px;">
+                <a th:href="@{/reservasi(idBuku=${idBukuGagal})}" class="btn btn-orange btn-sm">Ajukan Reservasi</a>
+            </div>
+        </div>
+    </div>
+
+    <section class="section">
+        <div class="section-heading">
+            <div>
+                <h2>Katalog Buku</h2>
+                <p>Pilih salah satu buku untuk memulai proses peminjaman.</p>
+            </div>
+        </div>
+        <div class="table-card">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID Buku</th>
+                        <th>Informasi Buku</th>
+                        <th>Ketersediaan</th>
+                        <th>Aksi</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="b : ${daftarBuku}">
+                        <td><span class="id-code" th:text="${b.idBuku}">B001</span></td>
+                        <td><span class="book-title" th:text="${b.judul}">Pemrograman Java</span><span class="book-subtitle">Koleksi perpustakaan</span></td>
+                        <td>
+                            <span th:if="${b.stok > 0}" class="stock-pill stock-good" th:text="|Tersedia · ${b.stok} buku|">Tersedia · 3 buku</span>
+                            <span th:if="${b.stok == 0}" class="stock-pill stock-empty">Stok habis</span>
+                        </td>
+                        <td class="action-cell">
+                            <form th:if="${b.stok > 0}" th:action="@{/pinjam}" method="post">
+                                <input type="hidden" name="idBuku" th:value="${b.idBuku}">
+                                <button class="btn btn-primary btn-sm" type="submit">Pinjam Buku</button>
+                            </form>
+                            <a th:if="${b.stok == 0}" th:href="@{/reservasi(idBuku=${b.idBuku})}" class="btn btn-orange btn-sm">Reservasi</a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(daftarBuku)}">
+                        <td colspan="4" class="empty-state">Belum ada data buku. Tambahkan buku melalui halaman Kelola Stok.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    <p class="footer-note">BookSpace · Sistem Informasi Perpustakaan</p>
+</main>
+</body>
+</html>

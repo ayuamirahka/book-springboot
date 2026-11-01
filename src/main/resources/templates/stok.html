@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kelola Stok | Perpustakaan</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<header class="site-header">
+    <div class="nav-inner">
+        <a class="brand" th:href="@{/pinjam}">
+            <span class="brand-mark">B</span>
+            <span class="brand-copy"><strong>BookSpace</strong><span>Library Management</span></span>
+        </a>
+        <nav class="nav-links" aria-label="Navigasi utama">
+            <a class="nav-link" th:href="@{/pinjam}">Pinjam Buku</a>
+            <a class="nav-link" th:href="@{/reservasi}">Reservasi</a>
+            <a class="nav-link active" th:href="@{/stok}">Kelola Stok</a>
+        </nav>
+    </div>
+</header>
+
+<main class="page-shell">
+    <section class="hero">
+        <div class="hero-content">
+            <span class="eyebrow">Area Pustakawan</span>
+            <h1>Kelola koleksi dan ketersediaan buku.</h1>
+            <p>Perbarui jumlah stok, sesuaikan ketersediaan, atau tambahkan judul buku baru ke dalam katalog perpustakaan.</p>
+            <span class="hero-tag"><span class="hero-tag-dot"></span> Manajemen Koleksi Buku</span>
+        </div>
+    </section>
+
+    <div th:if="${pesanSukses}" class="notice notice-success">
+        <span class="notice-icon">✓</span><div><strong>Perubahan berhasil disimpan</strong><span th:text="${pesanSukses}">Pesan sukses</span></div>
+    </div>
+    <div th:if="${pesanError}" class="notice notice-error">
+        <span class="notice-icon">!</span><div><strong>Perubahan tidak berhasil</strong><span th:text="${pesanError}">Pesan kesalahan</span></div>
+    </div>
+
+    <section class="section">
+        <div class="section-heading">
+            <div><h2>Daftar Buku dan Stok</h2><p>Gunakan aksi pada setiap baris untuk memperbarui stok buku.</p></div>
+        </div>
+        <div class="table-card">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr><th>ID Buku</th><th>Judul Buku</th><th>Stok Saat Ini</th><th>Tambah Stok</th><th>Ubah Stok</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="b : ${daftarBuku}">
+                        <td><span class="id-code" th:text="${b.idBuku}">B001</span></td>
+                        <td><span class="book-title" th:text="${b.judul}">Pemrograman Java</span></td>
+                        <td>
+                            <span th:if="${b.stok > 0}" class="stock-pill stock-good" th:text="|${b.stok} tersedia|">3 tersedia</span>
+                            <span th:if="${b.stok == 0}" class="stock-pill stock-empty">Habis · 0</span>
+                        </td>
+                        <td>
+                            <form class="inline-form" th:action="@{/stok/tambah}" method="post">
+                                <input type="hidden" name="idBuku" th:value="${b.idBuku}">
+                                <input type="number" name="jumlah" value="1" min="1" aria-label="Jumlah stok tambahan" required>
+                                <button class="btn btn-primary btn-sm" type="submit">+ Tambah</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form class="inline-form" th:action="@{/stok/ubah}" method="post">
+                                <input type="hidden" name="idBuku" th:value="${b.idBuku}">
+                                <input type="number" name="stokBaru" th:value="${b.stok}" min="0" aria-label="Stok baru" required>
+                                <button class="btn btn-outline btn-sm" type="submit">Simpan</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(daftarBuku)}"><td colspan="5" class="empty-state">Belum ada buku pada katalog.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section class="section form-grid">
+        <div class="form-card">
+            <span class="eyebrow">Koreksi Inventaris</span>
+            <h3>Tambah judul buku baru</h3>
+            <p>Daftarkan buku yang belum tersedia pada katalog perpustakaan.</p>
+            <form th:action="@{/stok/buku-baru}" method="post">
+                <div class="field"><label for="idBuku">ID Buku</label><input id="idBuku" type="text" name="idBuku" placeholder="Contoh: B004" maxlength="10" required></div>
+                <div class="field"><label for="judul">Judul Buku</label><input id="judul" type="text" name="judul" placeholder="Contoh: Algoritma dan Struktur Data" maxlength="200" required></div>
+                <div class="field"><label for="stok">Stok Awal</label><input id="stok" type="number" name="stok" value="1" min="0" required></div>
+                <button class="btn btn-orange" type="submit">Tambahkan ke Katalog</button>
+            </form>
+        </div>
+        <div class="form-card">
+            <span class="eyebrow">Panduan Pengelolaan</span>
+            <h3>Perbarui stok dengan tepat</h3>
+            <p>Pilih aksi berdasarkan perubahan inventaris yang dilakukan.</p>
+            <div class="notice notice-info" style="margin:0 0 12px;"><span class="notice-icon">+</span><div><strong>Tambah stok</strong>Menambahkan jumlah buku ke stok yang sudah tercatat.</div></div>
+            <div class="notice notice-info" style="margin:0;"><span class="notice-icon">↻</span><div><strong>Ubah stok</strong>Menetapkan jumlah stok baru secara langsung. Nilai 0 menandakan buku habis.</div></div>
+        </div>
+    </section>
+    <p class="footer-note">BookSpace · Sistem Informasi Perpustakaan</p>
+</main>
+</body>
+</html>

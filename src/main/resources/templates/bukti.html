@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bukti Peminjaman | Perpustakaan</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<div class="proof-shell">
+    <section class="proof-card">
+        <div class="proof-head">
+            <span class="eyebrow">Transaksi Berhasil</span>
+            <h1>Bukti Peminjaman Buku</h1>
+            <p>Transaksi peminjaman telah berhasil dicatat pada sistem.</p>
+        </div>
+        <div class="proof-body">
+            <div class="proof-number">DETAIL TRANSAKSI</div>
+            <table class="proof-table">
+                <tr><td>No. Transaksi</td><td th:text="${bukti.idTransaksi}">T0001</td></tr>
+                <tr><td>Nama Anggota</td><td th:text="${bukti.namaAnggota}">Budi Santoso</td></tr>
+                <tr><td>Judul Buku</td><td th:text="${bukti.judulBuku}">Pemrograman Java</td></tr>
+                <tr><td>Tanggal Pinjam</td><td th:text="${bukti.tanggalPinjam}">2026-11-01</td></tr>
+                <tr><td>Status</td><td><span class="status-pill status-waiting" th:text="${bukti.status}">DIPINJAM</span></td></tr>
+            </table>
+            <div class="proof-actions">
+                <a class="btn btn-primary" th:href="@{/pinjam}">Kembali ke Katalog</a>
+                <a class="btn btn-outline" th:href="@{/stok}">Lihat Kelola Stok</a>
+            </div>
+        </div>
+    </section>
+    <p class="footer-note">BookSpace · Simpan informasi transaksi ini sebagai bukti peminjaman.</p>
+</div>
+</body>
+</html>
